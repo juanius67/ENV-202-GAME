@@ -47,7 +47,9 @@ function initExamCountdown() {
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
         examTimerEl.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }, 1000);
+        };
+    updateTimer();
+    setInterval(updateTimer, 1000);
 }
 
 // Backend Communication
@@ -101,7 +103,7 @@ function shuffle(array) {
     return array;
 }
 
-function startGame() {
+window.startGame = function startGame() {
     if (allQuestions.length === 0) return;
 
     // Reset State
@@ -189,13 +191,23 @@ function handleAnswer(selected, buttonEl) {
 
         score += points;
         timeLeft += timeBonus;
+
         buttonEl.classList.add('flash-correct');
+        const overlay = document.getElementById('feedback-overlay');
+        overlay.classList.add('correct');
+        setTimeout(() => overlay.classList.remove('correct'), 300);
         updateEffects();
+
     } else {
         // Wrong
         const timePenalty = isBossMode ? 10 : 5;
         timeLeft -= timePenalty;
+
         buttonEl.classList.add('flash-wrong');
+        const overlay = document.getElementById('feedback-overlay');
+        overlay.classList.add('wrong');
+        setTimeout(() => overlay.classList.remove('wrong'), 300);
+
 
         // Show correct answer briefly by flashing it green
         const correctBtnIndex = currentOptions.indexOf(correctAnswer);
@@ -264,7 +276,7 @@ function endGame() {
     document.getElementById('end-score').innerText = score;
 }
 
-function returnToMenu() {
+window.returnToMenu = function returnToMenu() {
     endScreen.classList.add('hidden');
     startScreen.classList.remove('hidden');
 }
