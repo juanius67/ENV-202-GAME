@@ -7,7 +7,9 @@ from urllib.parse import urlparse, parse_qs
 import threading
 import time
 from datetime import datetime, timedelta
-from datetime import timedelta
+
+# Ensure the server runs in the same directory as the script so it can find index.html
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 PORT = 8000
 SAVE_FILE = 'save_data.json'
