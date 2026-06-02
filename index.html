@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metabolic Madness 3.0</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- EXAM COUNTDOWN -->
+    <div id="exam-countdown">
+        <div class="countdown-label">Final Exam: June 29, 2026</div>
+        <div id="countdown-timer">Loading...</div>
+    </div>
+
+    <!-- MAIN GAME CONTAINER -->
+    <div id="game-container">
+        <h1>Metabolic Madness</h1>
+        <p id="subtitle">The Ultimate Microbiology Drill Simulator</p>
+
+        <!-- START SCREEN (MENU) -->
+        <div id="start-screen">
+            <div class="save-stats">
+                <div class="stat-box streak-glow">
+                    <span class="stat-title">🔥 Daily Streak</span>
+                    <span class="stat-value" id="menu-streak">0</span>
+                </div>
+                <div class="stat-box score-glow">
+                    <span class="stat-title">🏆 High Score</span>
+                    <span class="stat-value" id="menu-high-score">0</span>
+                </div>
+            </div>
+
+            <button id="start-btn" onclick="startGame()">Start Drill</button>
+        </div>
+
+        <!-- GAME UI -->
+        <div id="game-ui" class="hidden">
+            <div class="stats">
+                <div id="score-container">ATP: <span id="score">0</span></div>
+                <div id="time-container">Time: <span id="time">60</span>s</div>
+            </div>
+
+            <div id="card">Question text goes here</div>
+
+            <div class="grid-options" id="options-container">
+                <!-- Buttons injected via JS -->
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="hidden">
+            <h2 id="end-title">Simulation Complete</h2>
+            <div class="end-stats">
+                <p>Generated: <span id="end-score" class="highlight-score">0</span> ATP</p>
+            </div>
+            <p id="end-streak-msg" class="hidden">🔥 Streak Updated! Great work today.</p>
+            <button id="restart-btn" onclick="returnToMenu()">Return to Main Menu</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
