@@ -1,0 +1,35 @@
+--- run_game.py
++++ run_game.py
+@@ -54,9 +55,18 @@
+
+                 # Update Streak (only increment once per day)
+                 today_str = datetime.now().strftime("%Y-%m-%d")
+-                if current_save['last_played_date'] != today_str:
+-                    current_save['streak'] += 1
++
++                if current_save['last_played_date'] == "":
++                     current_save['streak'] = 1
++                     current_save['last_played_date'] = today_str
++                elif current_save['last_played_date'] != today_str:
++                    last_date = datetime.strptime(current_save['last_played_date'], "%Y-%m-%d")
++                    yesterday_str = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
++                    if current_save['last_played_date'] == yesterday_str:
++                         current_save['streak'] += 1
++                    else:
++                         current_save['streak'] = 1
+                     current_save['last_played_date'] = today_str
+
+                 save_data(current_save)
+--- script.js
++++ script.js
+@@ -22,8 +22,7 @@
+
+ // Exam Countdown Logic
+ function initExamCountdown() {
+-    const examDate = new Date("2026-06-29T09:15:00").getTime();
+-
+-    setInterval(() => {
++    const updateTimer = () => {
++        const examDate = new Date("2026-06-29T09:15:00").getTime();
+         const now = new Date().getTime();
+         const distance = examDate - now;
