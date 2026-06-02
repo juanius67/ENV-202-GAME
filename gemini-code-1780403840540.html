@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metabolic Madness 2.0</title>
+    <style>
+        :root {
+            --shake-intensity: 0px;
+            --shake-deg: 0deg;
+            --box-shadow-color: rgba(0, 255, 136, 0.2);
+        }
+
+        @keyframes gradientBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0a192f);
+            background-size: 400% 400%;
+            animation: gradientBg 15s ease infinite;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        #game-container {
+            background-color: rgba(20, 20, 25, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px var(--box-shadow-color);
+            text-align: center;
+            max-width: 700px;
+            width: 90%;
+            border: 1px solid #302b63;
+            transition: box-shadow 0.3s;
+            position: relative;
+        }
+
+        /* Dynamic Container Wiggle */
+        @keyframes containerWiggle {
+            0% { transform: translate(calc(var(--shake-intensity) * -1), calc(var(--shake-intensity) * -1)) rotate(calc(var(--shake-deg) * -1)); }
+            50% { transform: translate(var(--shake-intensity), var(--shake-intensity)) rotate(var(--shake-deg)); }
+            100% { transform: translate(calc(var(--shake-intensity) * -1), calc(var(--shake-intensity) * -1)) rotate(calc(var(--shake-deg) * -1)); }
+        }
+        .wiggle {
+            animation: containerWiggle 0.1s infinite linear;
+        }
+
+        h1 {
+            color: #00ff88;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        #time { color: #ff3366; text-shadow: 0 0 10px #ff3366; }
+        
+        /* Individual Letter Shake for ATP */
+        .shake-char {
+            display: inline-block;
+            animation: charShake 0.05s infinite alternate;
+        }
+        @keyframes charShake {
+            0% { transform: translateY(calc(var(--shake-intensity) * -0.5)) translateX(calc(var(--shake-intensity) * 0.5)); }
+            100% { transform: translateY(calc(var(--shake-intensity) * 0.5)) translateX(calc(var(--shake-intensity) * -0.5)); }
+        }
+
+        #score-container {
+            color: #00d2ff; 
+            text-shadow: 0 0 10px #00d2ff;
+        }
+
+        #card {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2a2a40 100%);
+            padding: 30px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #4a4a6a;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .grid-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: #252538;
+            color: white;
+            padding: 20px 15px;
+            font-size: 1.1rem;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        .option-btn::before {
+            content: attr(data-key);
+            background: #3b82f6;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .option-btn:hover {
+            background-color: #3b82f6;
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        #start-btn {
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            color: white;
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+        }
+
+        #start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(236, 72, 153, 0.8);
+        }
+
+        .hidden { display: none !important; }
+        
+        /* Feedback Animations */
+        .flash-correct {
+            animation: pulseCorrect 0.4s ease-out;
+        }
+        @keyframes pulseCorrect {
+            0% { background-color: #10b981; border-color: #059669; box-shadow: 0 0 50px #10b981; transform: scale(1.05); }
+            100% { background-color: #252538; border-color: #3b82f6; transform: scale(1); }
+        }
+
+        .flash-wrong {
+            animation: shakeWrong 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shakeWrong {
+            10%, 90% { transform: translate3d(-2px, 0, 0); background-color: #ef4444; border-color: #b91c1c; box-shadow: 0 0 50px #ef4444;}
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>Metabolic Madness</h1>
+        <p id="subtitle">The ultimate ATP generation simulator.</p>
+        
+        <div id="game-ui" class="hidden">
+            <div class="stats">
+                <div id="score-container">ATP: <span id="score">0</span></div>
+                <div>Time: <span id="time">45</span>s</div>
+            </div>
+            
+            <div id="card">Question text goes here</div>
+            
+            <div class="grid-options" id="options-container">
+                <!-- Buttons injected via JS -->
+            </div>
+        </div>
+
+        <div id="start-screen">
+            <button id="start-btn" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Data strictly mapped from "fermentation_(Source).srt"
+        const sourceData = [
+            {
+                q: "What type of ATP generation does Fermentation rely on?",
+                c: "Substrate-level phosphorylation",
+                w: ["Oxidative phosphorylation", "Photophosphorylation", "Electron transport chains"]
+            },
+            {
+                q: "What is typically NOT required for fermentation to occur?",
+                c: "A proton-motive force",
+                w: ["Organic compounds", "Cytoplasmic processes", "Pyruvate"]
+            },
+            {
+                q: "In fermentation, organic compounds act as...",
+                c: "Both electron donors and acceptors",
+                w: ["Only electron donors", "Only electron acceptors", "Neither"]
+            },
+            {
+                q: "Which environment is most typical for fermentation?",
+                c: "Organic-rich soils lacking inorganic electron acceptors",
+                w: ["Highly oxygenated surface waters", "Dry, inorganic desert sands", "Environments rich in nitrate and sulfate"]
+            },
+            {
+                q: "Which molecule is a key central intermediate in all sugar fermentations?",
+                c: "Pyruvate",
+                w: ["Acetyl-CoA", "Citrate", "Oxaloacetate"]
+            },
+            {
+                q: "Homo-lactic acid fermentation converts glucose into...",
+                c: "Two lactates and 2 ATP (No CO2)",
+                w: ["Ethanol, CO2, and lactate", "Acetone, butanol, and CO2", "Propionate and sodium ions"]
+            },
+            {
+                q: "Hetero-lactic acid fermentation yields how much ATP per glucose?",
+                c: "1 ATP",
+                w: ["2 ATP", "3 ATP", "38 ATP"]
+            },
+            {
+                q: "To release excess electrons and maintain redox balance, fermenting organisms often produce:",
+                c: "Hydrogen gas",
+                w: ["Oxygen gas", "Nitrogen gas", "Methane gas"]
+            },
+            {
+                q: "Clostridium acetobutylicum switches to solventogenesis to prevent...",
+                c: "A lethal decrease in environmental pH",
+                w: ["Oxygen toxicity", "Depletion of ATP", "Excess buildup of hydrogen gas"]
+            },
+            {
+                q: "Propionogenium modestum generates energy by translocating what?",
+                c: "A sodium ion",
+                w: ["A proton", "A potassium ion", "An electron"]
+            },
+            {
+                q: "Compared to respiration, the overall energy yield of fermentation is:",
+                c: "Much lower",
+                w: ["Much higher", "Exactly the same", "Slightly higher"]
+            },
+            {
+                q: "The phosphoroclastic reaction transforms pyruvate into Acetyl-CoA, CO2, and...",
+                c: "Reduced ferredoxin (leading to H2)",
+                w: ["Oxygen", "Lactate", "Ethanol"]
+            }
+        ];
+
+        let score = 0;
+        let timeLeft = 45;
+        let timer;
+        let currentOptions = [];
+        let correctAnswer = "";
+
+        const scoreEl = document.getElementById('score');
+        const timeEl = document.getElementById('time');
+        const cardEl = document.getElementById('card');
+        const optionsContainer = document.getElementById('options-container');
+        const gameUI = document.getElementById('game-ui');
+        const startScreen = document.getElementById('start-screen');
+        const subtitle = document.getElementById('subtitle');
+        const gameContainer = document.getElementById('game-container');
+
+        // Keyboard mapping
+        document.addEventListener('keydown', (e) => {
+            if (gameUI.classList.contains('hidden')) return;
+            const key = e.key;
+            if (['1', '2', '3', '4'].includes(key)) {
+                const index = parseInt(key) - 1;
+                handleAnswer(currentOptions[index], document.getElementById(`btn-${index}`));
+            }
+        });
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 45;
+            updateScoreDisplay();
+            timeEl.innerText = timeLeft;
+            gameUI.classList.remove('hidden');
+            startScreen.classList.add('hidden');
+            subtitle.classList.add('hidden');
+            gameContainer.classList.add('wiggle'); // Add base wiggle class
+            
+            nextQuestion();
+            timer = setInterval(updateTime, 1000);
+        }
+
+        function updateTime() {
+            timeLeft--;
+            timeEl.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function nextQuestion() {
+            // Pick a random question
+            const qData = sourceData[Math.floor(Math.random() * sourceData.length)];
+            cardEl.innerText = qData.q;
+            correctAnswer = qData.c;
+
+            // Prepare and shuffle options
+            currentOptions = [qData.c, ...qData.w];
+            shuffle(currentOptions);
+
+            // Render buttons
+            optionsContainer.innerHTML = '';
+            currentOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.id = `btn-${index}`;
+                btn.setAttribute('data-key', index + 1);
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selected, buttonEl) {
+            if (!buttonEl) return;
+
+            if (selected === correctAnswer) {
+                // Correct
+                score += 5;
+                timeLeft += 2;
+                buttonEl.classList.add('flash-correct');
+                updateEffects();
+            } else {
+                // Wrong
+                timeLeft -= 4;
+                buttonEl.classList.add('flash-wrong');
+            }
+            
+            timeEl.innerText = timeLeft;
+            
+            // Brief delay to see the flash before next question
+            setTimeout(() => {
+                if (timeLeft > 0) nextQuestion();
+            }, 400);
+        }
+
+        function updateScoreDisplay() {
+            // Split score into spans for individual shaking
+            const scoreStr = score.toString();
+            let html = '';
+            for (let char of scoreStr) {
+                html += `<span class="shake-char">${char}</span>`;
+            }
+            scoreEl.innerHTML = html;
+        }
+
+        function updateEffects() {
+            updateScoreDisplay();
+            
+            // Calculate epicness based on score (cap at 60 points for max effect)
+            const intensityScale = Math.min(score / 60, 1); 
+            
+            // Max 4px shake, max 1.5deg rotation
+            const pxShake = (intensityScale * 4).toFixed(1);
+            const degShake = (intensityScale * 1.5).toFixed(1);
+            
+            // Update CSS variables for the animations
+            document.documentElement.style.setProperty('--shake-intensity', `${pxShake}px`);
+            document.documentElement.style.setProperty('--shake-deg', `${degShake}deg`);
+
+            // Glow shifts from green to intense blue/pink as score gets super high
+            if(score > 30) {
+                 document.documentElement.style.setProperty('--box-shadow-color', `rgba(236, 72, 153, ${0.2 + (intensityScale * 0.4)})`);
+            } else {
+                 document.documentElement.style.setProperty('--box-shadow-color', `rgba(0, 255, 136, ${0.2 + (intensityScale * 0.4)})`);
+            }
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            gameUI.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            subtitle.classList.remove('hidden');
+            
+            // Reset effects
+            gameContainer.classList.remove('wiggle');
+            document.documentElement.style.setProperty('--shake-intensity', `0px`);
+            document.documentElement.style.setProperty('--shake-deg', `0deg`);
+            document.documentElement.style.setProperty('--box-shadow-color', `rgba(0, 255, 136, 0.2)`);
+
+            subtitle.innerHTML = `Simulation Complete.<br><span style="font-size: 2rem; color: #00d2ff; text-shadow: 0 0 10px #00d2ff;">${score} ATP</span> Generated.<br><br>Can you push your metabolism faster?`;
+            document.getElementById('start-btn').innerText = "Reboot Simulation";
+        }
+    </script>
+</body>
+</html>
